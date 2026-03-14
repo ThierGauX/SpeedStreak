@@ -7,7 +7,7 @@ This file tracks future features, bugs to squash, and design enhancements for Sp
 - [x] **Installation Guide**: Convert the `.docx` guide to a plain text format for better readability and accessibility.
 - [x] **Firebase & APK Build**: Fully configure Firebase integration and generate the first production APK.
 - [ ] **Data Export**: Allow users to export their speed history to CSV/JSON.
-- [ ] **Dynamic Theming**: Support for more accent colors or a light mode toggle.
+- [X] **Dynamic Theming**: Support for more accent colors or a light mode toggle.
 
 ### 🌟 Features
 - [ ] **Ghost Mode**: Compete against your personal best in real-time on a map.

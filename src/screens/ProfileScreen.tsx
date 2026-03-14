@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert, Tex
 import { subscribeToProfile, updateProfile } from '../services/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { BADGES } from '../constants/badges';
-import { COLORS } from '../constants/theme';
+import { useAppTheme } from '../context/ThemeContext';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import * as ImagePicker from 'expo-image-picker';
@@ -12,6 +12,7 @@ import storage from '@react-native-firebase/storage';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
+  const { colors, isDark } = useAppTheme();
   const [profile, setProfile] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const [newPseudo, setNewPseudo] = useState('');
@@ -67,53 +68,52 @@ export default function ProfileScreen() {
     ? format(profile.createdAt.toDate(), 'MMMM yyyy', { locale: fr }) : '—';
 
   return (
-    <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[s.container, { backgroundColor: colors.bg }]} showsVerticalScrollIndicator={false}>
       {/* Avatar */}
-      <View style={s.header}>
+      <View style={[s.header, { borderBottomColor: colors.bgCardBorder }]}>
         <TouchableOpacity onPress={handlePickImage} disabled={loadingImage} style={s.avatarContainer}>
           {profile?.photoURL
-            ? <Image source={{ uri: profile.photoURL }} style={s.avatar} />
-            : <View style={[s.avatar, s.avatarFallback]}><Text style={{ fontSize: 40 }}>😎</Text></View>
+            ? <Image source={{ uri: profile.photoURL }} style={[s.avatar, { borderColor: colors.navBorder }]} />
+            : <View style={[s.avatar, s.avatarFallback, { backgroundColor: isDark ? 'rgba(0,195,255,0.15)' : 'rgba(0,195,255,0.08)', borderColor: colors.accent }]}><Text style={{ fontSize: 40 }}>😎</Text></View>
           }
           {loadingImage && <View style={s.loadingOverlay}><ActivityIndicator color="#fff" /></View>}
-          <View style={s.editBadge}><Text style={{ fontSize: 12 }}>✏️</Text></View>
+          <View style={[s.editBadge, { backgroundColor: colors.bgCard, borderColor: colors.accent }]}><Text style={{ fontSize: 12 }}>✏️</Text></View>
         </TouchableOpacity>
 
         {editing ? (
           <View style={s.editRow}>
             <TextInput
-              style={s.input}
+              style={[s.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.accent }]}
               value={newPseudo}
               onChangeText={setNewPseudo}
               placeholder="Nouveau pseudo"
-              placeholderTextColor={COLORS.textMuted}
+              placeholderTextColor={colors.textMuted}
               autoFocus
             />
-            <TouchableOpacity style={s.saveBtn} onPress={handleUpdatePseudo}><Text style={s.saveText}>OK</Text></TouchableOpacity>
-            <TouchableOpacity style={s.cancelBtn} onPress={() => setEditing(false)}><Text style={s.cancelText}>X</Text></TouchableOpacity>
+            <TouchableOpacity style={[s.saveBtn, { backgroundColor: colors.accent }]} onPress={handleUpdatePseudo}><Text style={s.saveText}>OK</Text></TouchableOpacity>
+            <TouchableOpacity style={s.cancelBtn} onPress={() => setEditing(false)}><Text style={[s.cancelText, { color: colors.text }]}>X</Text></TouchableOpacity>
           </View>
         ) : (
           <View style={s.nameRow}>
-            <Text style={s.name}>{profile?.displayName ?? 'Anonyme'}</Text>
+            <Text style={[s.name, { color: colors.text }]}>{profile?.displayName ?? 'Anonyme'}</Text>
             <TouchableOpacity onPress={() => { setNewPseudo(profile?.displayName ?? ''); setEditing(true); }} style={{ marginLeft: 8 }}>
               <Text style={{ fontSize: 16 }}>✏️</Text>
             </TouchableOpacity>
           </View>
         )}
         
-        {/* Email hidden by default, visible only to the user for reference but lightly styled */}
-        <Text style={s.email}>{user?.email}</Text>
+        <Text style={[s.email, { color: colors.textMuted }]}>{user?.email}</Text>
         
-        <View style={s.streakPill}>
+        <View style={[s.streakPill, { backgroundColor: colors.orangeDim, borderColor: colors.orangeBorder }]}>
           <Text style={{ fontSize: 18 }}>🔥</Text>
-          <Text style={s.streakNum}>{profile?.streak ?? 0}</Text>
-          <Text style={s.streakLabel}>jours de série</Text>
+          <Text style={[s.streakNum, { color: colors.orange }]}>{profile?.streak ?? 0}</Text>
+          <Text style={[s.streakLabel, { color: colors.orange }]}>jours de série</Text>
         </View>
       </View>
 
       {/* Stats */}
       <View style={s.section}>
-        <Text style={s.sectionTitle}>MES STATISTIQUES</Text>
+        <Text style={[s.sectionTitle, { color: colors.textMuted }]}>MES STATISTIQUES</Text>
         <View style={s.grid}>
           {[
             { icon: '🔥', label: 'Série actuelle',  value: `${profile?.streak ?? 0} jours` },
@@ -123,10 +123,10 @@ export default function ProfileScreen() {
             { icon: '👥', label: 'Amis',             value: (profile?.friends ?? []).length },
             { icon: '📅', label: 'Membre depuis',    value: memberSince },
           ].map((st, i) => (
-            <View key={i} style={s.statCard}>
-              <Text style={{ fontSize: 22, marginBottom: 6 }}>{st.icon}</Text>
-              <Text style={s.statValue}>{st.value}</Text>
-              <Text style={s.statLabel}>{st.label}</Text>
+            <View key={i} style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.bgCardBorder }]}>
+              <Text style={{ fontSize: 24, marginBottom: 8 }}>{st.icon}</Text>
+              <Text style={[s.statValue, { color: colors.text }]}>{st.value}</Text>
+              <Text style={[s.statLabel, { color: colors.textMuted }]}>{st.label}</Text>
             </View>
           ))}
         </View>
@@ -135,12 +135,12 @@ export default function ProfileScreen() {
       {/* Badges récents */}
       {unlockedBadges.length > 0 && (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>BADGES RÉCENTS</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <Text style={[s.sectionTitle, { color: colors.textMuted }]}>BADGES RÉCENTS</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 4 }}>
             {unlockedBadges.slice(-6).reverse().map(b => (
-              <View key={b.id} style={s.badgePill}>
-                <Text style={{ fontSize: 28 }}>{b.icon}</Text>
-                <Text style={s.badgeName}>{b.name}</Text>
+              <View key={b.id} style={[s.badgePill, { backgroundColor: colors.goldDim, borderColor: colors.goldBorder }]}>
+                <Text style={{ fontSize: 32 }}>{b.icon}</Text>
+                <Text style={[s.badgeName, { color: colors.gold }]}>{b.name}</Text>
               </View>
             ))}
           </ScrollView>
@@ -148,44 +148,43 @@ export default function ProfileScreen() {
       )}
 
       {/* Déconnexion */}
-      <View style={s.section}>
-        <TouchableOpacity style={s.signOutBtn} onPress={handleSignOut}>
-          <Text style={s.signOutText}>Se déconnecter</Text>
+      <View style={[s.section, { paddingBottom: 40 }]}>
+        <TouchableOpacity style={[s.signOutBtn, { backgroundColor: isDark ? 'rgba(255,68,68,0.1)' : 'rgba(255,68,68,0.05)', borderColor: isDark ? 'rgba(255,68,68,0.2)' : 'rgba(255,68,68,0.15)' }]} onPress={handleSignOut}>
+          <Text style={[s.signOutText, { color: colors.red }]}>Se déconnecter</Text>
         </TouchableOpacity>
       </View>
-      <View style={{ height: 32 }} />
     </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: COLORS.bg },
-  header:       { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: COLORS.bgCardBorder },
-  avatarContainer:{ position: 'relative', marginBottom: 12 },
-  avatar:       { width: 90, height: 90, borderRadius: 45 },
-  avatarFallback: { backgroundColor: 'rgba(0,195,255,0.15)', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: COLORS.accent },
-  loadingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 45, justifyContent: 'center', alignItems: 'center' },
-  editBadge:    { position: 'absolute', bottom: 0, right: 0, backgroundColor: COLORS.bgCard, borderRadius: 12, width: 24, height: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: COLORS.accent },
+  container:    { flex: 1 },
+  header:       { alignItems: 'center', paddingVertical: 36, paddingHorizontal: 20, borderBottomWidth: 1 },
+  avatarContainer:{ position: 'relative', marginBottom: 16, elevation: 5, shadowColor: '#00c3ff', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.2, shadowRadius: 8 },
+  avatar:       { width: 100, height: 100, borderRadius: 50, borderWidth: 1 },
+  avatarFallback: { alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
+  loadingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 50, justifyContent: 'center', alignItems: 'center' },
+  editBadge:    { position: 'absolute', bottom: 0, right: 0, borderRadius: 14, width: 28, height: 28, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
   nameRow:      { flexDirection: 'row', alignItems: 'center' },
-  name:         { color: COLORS.text, fontSize: 22, fontWeight: '800' },
+  name:         { fontSize: 26, fontWeight: '900', letterSpacing: 0.5 },
   editRow:      { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-  input:        { backgroundColor: COLORS.bgCard, color: COLORS.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, fontSize: 16, minWidth: 150, borderWidth: 1, borderColor: COLORS.accent },
-  saveBtn:      { backgroundColor: COLORS.accent, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8 },
-  saveText:     { color: '#000', fontWeight: 'bold' },
-  cancelBtn:    { backgroundColor: 'rgba(255,255,255,0.1)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8 },
-  cancelText:   { color: '#fff', fontWeight: 'bold' },
-  email:        { color: COLORS.textMuted, fontSize: 13, marginTop: 8, marginBottom: 16, opacity: 0.5 },
-  streakPill:   { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.orangeDim, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 16, borderWidth: 1, borderColor: COLORS.orangeBorder },
-  streakNum:    { color: COLORS.orange, fontSize: 20, fontWeight: '800' },
-  streakLabel:  { color: COLORS.orange, fontSize: 13, opacity: 0.8 },
-  section:      { padding: 16, paddingTop: 20 },
-  sectionTitle: { color: COLORS.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 12 },
-  grid:         { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  statCard:     { width: '47%', backgroundColor: COLORS.bgCard, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: COLORS.bgCardBorder },
-  statValue:    { color: COLORS.text, fontSize: 18, fontWeight: '800' },
-  statLabel:    { color: COLORS.textMuted, fontSize: 11, marginTop: 2 },
-  badgePill:    { backgroundColor: COLORS.goldDim, borderRadius: 14, padding: 12, alignItems: 'center', marginRight: 10, borderWidth: 1, borderColor: COLORS.goldBorder, minWidth: 80 },
-  badgeName:    { color: COLORS.gold, fontSize: 10, marginTop: 4, fontWeight: '700', textAlign: 'center' },
-  signOutBtn:   { backgroundColor: 'rgba(255,68,68,0.1)', borderRadius: 14, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,68,68,0.2)' },
-  signOutText:  { color: COLORS.red, fontSize: 15, fontWeight: '700' },
+  input:        { borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10, fontSize: 16, minWidth: 180, borderWidth: 1, fontWeight: '600' },
+  saveBtn:      { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12 },
+  saveText:     { color: '#fff', fontWeight: '800' },
+  cancelBtn:    { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: 'transparent' },
+  cancelText:   { fontWeight: 'bold' },
+  email:        { fontSize: 13, marginTop: 4, marginBottom: 16, opacity: 0.6, fontWeight: '500' },
+  streakPill:   { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 24, paddingVertical: 8, paddingHorizontal: 20, borderWidth: 1 },
+  streakNum:    { fontSize: 20, fontWeight: '900' },
+  streakLabel:  { fontSize: 13, fontWeight: '700', opacity: 0.9 },
+  section:      { padding: 18, paddingTop: 24 },
+  sectionTitle: { fontSize: 12, fontWeight: '800', letterSpacing: 1.5, marginBottom: 16 },
+  grid:         { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  statCard:     { width: '48%', borderRadius: 16, padding: 16, borderWidth: 1, elevation: 2, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.05, shadowRadius: 4 },
+  statValue:    { fontSize: 18, fontWeight: '900' },
+  statLabel:    { fontSize: 11, marginTop: 4, fontWeight: '600' },
+  badgePill:    { borderRadius: 16, padding: 16, alignItems: 'center', marginRight: 12, borderWidth: 1, minWidth: 90, elevation: 3, shadowColor: '#ffc700', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.15, shadowRadius: 6 },
+  badgeName:    { fontSize: 11, marginTop: 6, fontWeight: '800', textAlign: 'center' },
+  signOutBtn:   { borderRadius: 16, paddingVertical: 16, alignItems: 'center', borderWidth: 1 },
+  signOutText:  { fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
 });

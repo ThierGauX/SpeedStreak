@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
 import * as Haptics  from 'expo-haptics';
 
-const DURATION_MS = 15_000; // 15 secondes
+const DURATION_MS = 30_000; // 30 secondes
 
 export function useSpeed() {
   const [phase, setPhase]           = useState<'idle' | 'measuring' | 'done'>('idle');
