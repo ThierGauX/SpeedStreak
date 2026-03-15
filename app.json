@@ -13,7 +13,6 @@
         "backgroundColor": "#08090e"
       },
       "package": "com.yourname.speedstreak",
-      "googleServicesFile": "./google-services.json",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -25,13 +24,7 @@
     },
     "plugins": [
       "expo-location",
-      "expo-notifications",
-      [
-        "@react-native-google-signin/google-signin",
-        {
-          "iosUrlScheme": "com.googleusercontent.apps.REMPLACE_PAR_TON_CLIENT_ID"
-        }
-      ]
+      "expo-notifications"
     ],
     "extra": {
       "eas": {

@@ -1,14 +1,15 @@
 // src/screens/ProfileScreen.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert, TextInput, ActivityIndicator } from 'react-native';
-import { subscribeToProfile, updateProfile } from '../services/firestore';
+import { subscribeToProfile, updateProfile } from '../services/database';
 import { useAuth } from '../hooks/useAuth';
 import { BADGES } from '../constants/badges';
 import { useAppTheme } from '../context/ThemeContext';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import * as ImagePicker from 'expo-image-picker';
-import storage from '@react-native-firebase/storage';
+import { supabase } from '../config/supabase';
+// removed firebase storage import
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -49,12 +50,25 @@ export default function ProfileScreen() {
       setLoadingImage(true);
       try {
         const uri = result.assets[0].uri;
+        // Fetch the file
         const response = await fetch(uri);
         const blob = await response.blob();
-        const ref = storage().ref(`avatars/${user.uid}.jpg`);
-        await ref.put(blob);
-        const url = await ref.getDownloadURL();
-        await updateProfile(user.uid, { photoURL: url });
+        
+        // Use Supabase storage
+        // Assuming a bucket named 'avatars' exists and is publicly readable
+        const filePath = `avatars/${user.uid}-${Date.now()}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, blob, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+        await updateProfile(user.uid, { photoURL: publicUrl });
       } catch (e: any) {
         Alert.alert('Erreur', e.message);
       } finally {

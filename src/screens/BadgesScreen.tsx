@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { BADGES, Badge } from '../constants/badges';
-import { subscribeToProfile } from '../services/firestore';
+import { subscribeToProfile } from '../services/database';
 import { useAuth } from '../hooks/useAuth';
 import { useAppTheme } from '../context/ThemeContext';
 

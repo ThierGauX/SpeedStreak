@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Modal, Dim
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSpeed } from '../hooks/useSpeed';
 import { useAuth } from '../hooks/useAuth';
-import { saveMeasure, subscribeToProfile } from '../services/firestore';
+import { saveMeasure, subscribeToProfile } from '../services/database';
 import { scheduleDailyReminder, sendBadgeNotification } from '../services/notifications';
 import { Badge } from '../constants/badges';
 import { useAppTheme } from '../context/ThemeContext';

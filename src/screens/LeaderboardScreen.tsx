@@ -1,7 +1,7 @@
 // src/screens/LeaderboardScreen.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, TextInput, Alert, RefreshControl, Image } from 'react-native';
-import { subscribeToGlobalLeaderboard, subscribeToFriendsLeaderboard, addFriendByEmail } from '../services/firestore';
+import { subscribeToGlobalLeaderboard, subscribeToFriendsLeaderboard, addFriendByEmail } from '../services/database';
 import { useAuth } from '../hooks/useAuth';
 import { useAppTheme } from '../context/ThemeContext';
 
