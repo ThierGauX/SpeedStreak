@@ -14,7 +14,7 @@ SpeedStreak is a high-performance speed tracking mobile application built with *
 ## 🛠️ Technical Stack
 
 - **Framework**: [Expo](https://expo.dev/) (React Native)
-- **Backend**: [Google Firebase](https://firebase.google.com/) (Auth, Firestore, Messaging)
+- **Backend**: Supabase
 - **Styling**: Custom theme with support for gradients and haptics.
 - **Navigation**: React Navigation (Bottom Tabs & Native Stack)
 - **Date Handling**: `date-fns` for streak calculations.
